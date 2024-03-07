@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include "RandomUtils.hpp"
-#include "BlackScholes.hpp"
+#include "DiffusionBlackScholes.hpp"
 #include "Pricer.hpp"
 
 
@@ -49,7 +49,7 @@ static void testEuropeanCallPriceLikelihood() {
     double T = 0.5;
     long sampleLen = 100000;
     long timeSteps = 1;
-    BlackScholes bs(mu, sigma);
+    DiffusionBlackScholes bs(mu, sigma);
     EuropeanCall call(K, T);
     double* payoffs = new double[sampleLen];
     MonteCarlo(payoffs, sampleLen, bs, call, timeSteps);
