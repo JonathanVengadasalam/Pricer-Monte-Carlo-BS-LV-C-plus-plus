@@ -12,10 +12,12 @@ double DiffusionDupire::drift(double X_t, double t) {
 }
 
 double DiffusionDupire::volatility(double X_t, double _t) {
-    long x0 = x[firstInfIndex(x, xLen, X_t)];
-    long t0 = t[firstInfIndex(t, tLen, _t)];
-    long x1 = x[x0 + 1];
-    long t1 = t[t0 + 1];
+    long xInd = firstInfIndex(x, xLen, X_t);
+    long tInd = firstInfIndex(t, tLen, _t);
+    double x0 = x[xInd];
+    double t0 = t[tInd];
+    double x1 = x[xInd + 1];
+    double t1 = t[tInd + 1];
 
     return X_t * (
            sigma[x0 + tLen * t0] * (x1 - X_t) * (t1 - _t)
