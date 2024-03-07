@@ -12,8 +12,8 @@ double DiffusionDupire::drift(double X_t, double t) {
 }
 
 double DiffusionDupire::volatility(double X_t, double _t) {
-    long x0 = firstInfIndex(x, xLen, X_t);
-    long t0 = firstInfIndex(t, tLen, _t);
+    long x0 = x[firstInfIndex(x, xLen, X_t)];
+    long t0 = t[firstInfIndex(t, tLen, _t)];
     long x1 = x[x0 + 1];
     long t1 = t[t0 + 1];
 
