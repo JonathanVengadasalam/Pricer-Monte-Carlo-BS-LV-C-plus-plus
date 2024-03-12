@@ -1,4 +1,3 @@
-#include <random>
 #include <cmath>
 
 void swap(double& a, double& b) {
@@ -29,39 +28,14 @@ void quickSort(double arr[], long low, long high) {
     }
 }
 
-void normalDistritor(double values[], long valuesLen) {
-    std::random_device rd;
-    std::default_random_engine engine(rd());
-    std::normal_distribution<double> distribution(0.0, 1.0);
-
+double max(double values[], long valuesLen) {
+    double max = 0.;
     for (long i = 0; i < valuesLen; ++i) {
-        values[i] = distribution(engine);
-    }
-}
-
-double normalProba(double x) {
-    return 0.5 * (1 + std::erf(x / std::sqrt(2.0)));
-}
-
-double kolmogorovSmirnov(double empiricPoints[], long empiricPointsLen) {
-    double maxDistance = 0;
-    double empiricLen = (double)empiricPointsLen;
-    for (long i = 0; i < empiricPointsLen; ++i) {
-        double scaleDistance = std::abs(normalProba(empiricPoints[i]) - (i + 1) / empiricLen);
-        if (scaleDistance > maxDistance) {
-            maxDistance = scaleDistance;
+        if (values[i] > max) {
+            max = values[i];
         }
     }
-    return maxDistance;
-}
-
-double andersonDarling(double values[], long valuesLen) {
-    double somme = 0.;
-    for (long i = 1; i < valuesLen + 1; ++i) {
-        somme += (2 * i - 1) * (std::log(normalProba(values[i - 1])) + std::log(1 - normalProba(values[valuesLen - i])));
-    }
-
-    return -(double)valuesLen - somme / valuesLen;
+    return max;
 }
 
 double sum(double values[], long valuesLen) {
@@ -90,11 +64,10 @@ double variance(double values[], long valuesLen) {
 }
 
 long firstInfIndex(double ascendingTable[], long ascendingTableLen, double value) {
-    if (value < ascendingTable[0]) return -1;
     long high = ascendingTableLen - 1;
     if (value > ascendingTable[high]) return high;
-    
     long low = 0;
+    
     while (true) {
         if (low > high - 2) break;
         long mid = (high + low) / 2;
@@ -105,6 +78,68 @@ long firstInfIndex(double ascendingTable[], long ascendingTableLen, double value
             low = mid;
         }
     }
-
     return  low;
+}
+
+#define PI 3.14159265358979323846
+
+class Complex {
+public:
+    double x;
+    double y;
+
+    Complex(double theta) {
+        x = cos(theta);
+        y = sin(theta);
+    }
+
+    Complex(double _x, double _y) {
+        x = _x;
+        y = _y;
+    }
+
+    static Complex object(double theta) {
+        Complex result(theta);
+        return result;
+    }
+
+    static Complex object(double _x, double _y) {
+        Complex result(_x, _y);
+        return result;
+    }
+
+    double angle() {
+        return x == 0. ? PI * 0.5 * (1 - 2 * int(y < 0.)) : atan(y / x) + int(x < 0.) * PI;
+    }
+
+    double module() {
+        return sqrt(x * x + y * y);
+    }
+
+    Complex operator+(const Complex& other) const {
+        return object(x + other.x, y + other.y);
+    }
+
+    Complex operator+(double term) const {
+        return object(x + term, y);
+    }
+
+    Complex operator*(const Complex& other) const {
+        return object(x * other.x - y * other.y, x * other.y + y * other.x);
+    }
+
+    Complex operator*(double factor) const {
+        return object(x * factor, y * factor);
+    }
+};
+
+void discretFourierTransform(double modules[], double angles[], double signals[], long signalsLen) {
+    for (long i = 0; i < signalsLen; ++i) {
+        Complex c(0., 0.);
+        for (long j = 0; j < signalsLen; ++j) {
+            c = c + Complex::object(-2 * PI * i * j / signalsLen) * signals[j];
+        }
+        modules[i] = c.module();
+        angles[i] = c.angle();
+    }
 }
