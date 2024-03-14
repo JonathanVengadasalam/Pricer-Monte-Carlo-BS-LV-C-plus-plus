@@ -1,7 +1,13 @@
 #include "RandomUniform.hpp"
 #include <cmath>
 
-RandomUniform::RandomUniform(long _N) : RandomGenerator(_N) {}
+RandomUniform::RandomUniform(long _N) : RandomGenerator(_N) {
+	shuffler = nullptr;
+}
+
+RandomUniform::RandomUniform(long _N, RandomUniform* _shuffler) : RandomGenerator(_N) {
+	shuffler = _shuffler;
+}
 
 double RandomUniform::probability(double value) {
 	return value;
@@ -9,6 +15,9 @@ double RandomUniform::probability(double value) {
 
 void RandomUniform::generateArray(double values[], long valuesLen) {
 	computeArray(values, valuesLen);
+	if (shuffler != nullptr) {
+		shuffler->shuffle(values, valuesLen);
+	}
 }
 
 void RandomUniform::shuffle(double values[], long valuesLen) {
