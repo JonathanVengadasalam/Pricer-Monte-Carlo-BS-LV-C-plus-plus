@@ -1,3 +1,4 @@
+#include "Utils.hpp"
 #include <cmath>
 
 void swap(double& a, double& b) {
@@ -39,28 +40,43 @@ double max(double values[], long valuesLen) {
 }
 
 double sum(double values[], long valuesLen) {
+    return sum(values, valuesLen, 1);
+}
+
+double sum(double values[], long valuesLen, long exposant) {
     double sum = 0.;
     for (long i = 0; i < valuesLen; ++i) {
-        sum += values[i];
+        sum += std::pow(values[i], exposant);
     }
     return sum;
 }
 
 double mean(double values[], long valuesLen) {
-    return sum(values, valuesLen) / valuesLen;
+    return mean(values, valuesLen, 1);
 }
 
-double meanSquare(double values[], long valuesLen) {
-    double sum = 0.;
-    for (long i = 0; i < valuesLen; ++i) {
-        sum += values[i] * values[i];
-    }
-    return sum / valuesLen;
+double mean(double values[], long valuesLen, long exposant) {
+    return sum(values, valuesLen, exposant) / valuesLen;
 }
 
 double variance(double values[], long valuesLen) {
     double _mean = mean(values, valuesLen);
-    return meanSquare(values, valuesLen) - _mean * _mean;
+    return mean(values, valuesLen, 2) - std::pow(_mean, 2);
+}
+
+double skew(double values[], long valuesLen) {
+    double _mean = mean(values, valuesLen);
+    return mean(values, valuesLen, 3) 
+        - 3 * mean(values, valuesLen, 2) * _mean 
+        + 2 * std::pow(_mean, 3);
+}
+
+double kurtosis(double values[], long valuesLen) {
+    double _mean = mean(values, valuesLen);
+    return mean(values, valuesLen, 4) 
+        - 2 * mean(values, valuesLen, 3) * _mean 
+        - 3 * mean(values, valuesLen, 2) * _mean 
+        + 4 * std::pow(_mean, 4);
 }
 
 long firstInfIndex(double ascendingTable[], long ascendingTableLen, double value) {
@@ -108,7 +124,7 @@ public:
         return result;
     }
 
-    double angle() {
+    double phase() {
         return x == 0. ? PI * 0.5 * (1 - 2 * int(y < 0.)) : atan(y / x) + int(x < 0.) * PI;
     }
 
@@ -133,13 +149,13 @@ public:
     }
 };
 
-void discretFourierTransform(double modules[], double angles[], double signals[], long signalsLen) {
+void discretFourierTransform(double modules[], double phases[], double signals[], long signalsLen) {
     for (long i = 0; i < signalsLen; ++i) {
         Complex c(0., 0.);
         for (long j = 0; j < signalsLen; ++j) {
             c = c + Complex::object(-2 * PI * i * j / signalsLen) * signals[j];
         }
         modules[i] = c.module();
-        angles[i] = c.angle();
+        phases[i] = c.phase();
     }
 }
