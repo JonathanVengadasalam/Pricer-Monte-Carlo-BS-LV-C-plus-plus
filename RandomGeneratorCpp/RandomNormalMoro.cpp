@@ -1,15 +1,14 @@
 #include "RandomNormalMoro.hpp"
 #include <cmath>
 
-RandomNormalMoro::RandomNormalMoro(RandomUniform &_uniform, RandomUniform *_shuffler) : RandomNormal(_uniform.N) {
+RandomNormalMoro::RandomNormalMoro(RandomUniform &_uniform) : RandomNormal(_uniform.N) {
 	uniform = &_uniform;
-	shuffler = _shuffler;
 }
 
 void RandomNormalMoro::generateArray(double values[], long valuesLen) {
-	computeArray(values, valuesLen);
-	if (shuffler != nullptr) {
-		shuffler->shuffle(values, valuesLen);
+	uniform->generateArray(values, valuesLen);
+	for (long i = 0; i < valuesLen; ++i) {
+		values[i] = inverseNormalProba(values[i]);
 	}
 }
 
