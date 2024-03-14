@@ -4,10 +4,9 @@
 class RandomNormalMoro : public RandomNormal {
 public:
     RandomUniform *uniform;
-    RandomUniform *shuffler;
 
-    RandomNormalMoro(RandomUniform &_uniform, RandomUniform *_shuffler);
-    double computeValue() override;
+	RandomNormalMoro(RandomUniform &_uniform);
+	double computeValue() override;
     void generateArray(double values[], long valuesLen) override;
     static double inverseNormalProba(double x);
 
