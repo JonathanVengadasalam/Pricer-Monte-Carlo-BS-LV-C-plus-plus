@@ -6,13 +6,12 @@ public:
     RandomUniform *uniform;
     RandomUniform *shuffler;
 
-	RandomNormalMoro(RandomUniform &_uniform, RandomUniform *_shuffler);
-	double computeValue() override;
+    RandomNormalMoro(RandomUniform &_uniform, RandomUniform *_shuffler);
+    double computeValue() override;
     void generateArray(double values[], long valuesLen) override;
+    static double inverseNormalProba(double x);
 
 private:
-    double inverseNormalProba(double x);
-
     static const double a0_;
     static const double a1_;
     static const double a2_;
