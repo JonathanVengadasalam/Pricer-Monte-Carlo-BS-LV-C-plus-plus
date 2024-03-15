@@ -5,7 +5,7 @@
 
 class RandomNormal : public RandomGenerator {
 public:
-	RandomNormal(long _N);
+	RandomNormal();
 	double probability(double value) override;
 	double andersonDarling(double ascendingValues[], long ascendingValuesLen);
 	static double Probability(double value);

@@ -7,8 +7,9 @@ class RandomUniform : public RandomGenerator {
 public:
 	RandomUniform* shuffler;
 
-	RandomUniform(long _N);
-	RandomUniform(long _N, RandomUniform* _shuffler);
+	RandomUniform();
+	RandomUniform(RandomUniform* _shuffler);
+	void initialize() override;
 	double probability(double value) override;
 	void generateArray(double values[], long valuesLen) override;
 	void shuffle(double values[], long valuesLen);

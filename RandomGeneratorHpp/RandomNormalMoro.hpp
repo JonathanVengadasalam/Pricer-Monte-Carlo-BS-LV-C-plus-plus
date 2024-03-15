@@ -6,6 +6,7 @@ public:
     RandomUniform *uniform;
 
 	RandomNormalMoro(RandomUniform &_uniform);
+    void initialize() override;
 	double computeValue() override;
     void generateArray(double values[], long valuesLen) override;
     static double inverseNormalProba(double x);
