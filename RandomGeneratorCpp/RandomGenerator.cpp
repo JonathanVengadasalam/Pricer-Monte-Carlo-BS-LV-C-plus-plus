@@ -1,8 +1,8 @@
 #include "RandomGenerator.hpp"
 #include <cmath>
 
-RandomGenerator::RandomGenerator(long _N) {
-	N = _N;
+RandomGenerator::RandomGenerator() {
+	N = 0;
 }
 
 double RandomGenerator::generateValue() {
@@ -16,16 +16,13 @@ void RandomGenerator::computeArray(double values[], long valuesLen) {
     }
 }
 
-long RandomGenerator::kolmogorovSmirnovInd(double ascendingValues[], long ascendingValuesLen) {
-    long maxDistanceInd = -1;
-    double maxDistance = 0.;
-    double empiricLen = (double)ascendingValuesLen;
-    for (long i = 0; i < ascendingValuesLen; ++i) {
-        double scaleDistance = std::abs(probability(ascendingValues[i]) - (i + 1) / empiricLen);
-        if (scaleDistance > maxDistance) {
-            maxDistance = scaleDistance;
-            maxDistanceInd = i;
-        }
+void RandomGenerator::kolmogorovSmirnov(double values[], long valuesLen, double ascendingValues[]) {
+    double empiricLen = (double)valuesLen;
+    for (long i = 0; i < valuesLen; ++i) {
+        values[i] = std::abs(probability(ascendingValues[i]) - (i + 1) / empiricLen);
     }
-    return maxDistanceInd;
+}
+
+void RandomGenerator::initialize() {
+    N = 0;
 }

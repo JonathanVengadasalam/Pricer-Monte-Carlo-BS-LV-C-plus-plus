@@ -1,12 +1,19 @@
 #include "RandomUniform.hpp"
 #include <cmath>
 
-RandomUniform::RandomUniform(long _N) : RandomGenerator(_N) {
+RandomUniform::RandomUniform() : RandomGenerator() {
 	shuffler = nullptr;
 }
 
-RandomUniform::RandomUniform(long _N, RandomUniform* _shuffler) : RandomGenerator(_N) {
+RandomUniform::RandomUniform(RandomUniform* _shuffler) : RandomGenerator() {
 	shuffler = _shuffler;
+}
+
+void RandomUniform::initialize() {
+	RandomGenerator::initialize();
+	if (shuffler != nullptr) {
+		shuffler->initialize();
+	}
 }
 
 double RandomUniform::probability(double value) {

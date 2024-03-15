@@ -1,7 +1,7 @@
 #include "RandomNormal.hpp"
 #include <cmath>
 
-RandomNormal::RandomNormal(long _N) : RandomGenerator(_N) {}
+RandomNormal::RandomNormal() : RandomGenerator() {}
 
 double RandomNormal::Probability(double value) {
 	return 0.5 * (1 + std::erf(value / std::sqrt(2.0)));

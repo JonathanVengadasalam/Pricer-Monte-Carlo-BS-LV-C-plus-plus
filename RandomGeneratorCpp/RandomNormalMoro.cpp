@@ -1,7 +1,7 @@
 #include "RandomNormalMoro.hpp"
 #include <cmath>
 
-RandomNormalMoro::RandomNormalMoro(RandomUniform &_uniform) : RandomNormal(_uniform.N) {
+RandomNormalMoro::RandomNormalMoro(RandomUniform &_uniform) : RandomNormal() {
 	uniform = &_uniform;
 }
 
@@ -10,6 +10,11 @@ void RandomNormalMoro::generateArray(double values[], long valuesLen) {
 	for (long i = 0; i < valuesLen; ++i) {
 		values[i] = inverseNormalProba(values[i]);
 	}
+}
+
+void RandomNormalMoro::initialize() {
+	RandomNormal::initialize();
+	uniform->initialize();
 }
 
 double RandomNormalMoro::computeValue() {

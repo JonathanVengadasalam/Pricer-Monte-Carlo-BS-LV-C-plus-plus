@@ -3,6 +3,12 @@
 
 RandomUniformLCG::RandomUniformLCG(size_t _x) : RandomUniform(0) {
 	x = _x;
+	x0 = _x;
+}
+
+void RandomUniformLCG::initialize() {
+	RandomUniform::initialize();
+	x = x0;
 }
 
 double RandomUniformLCG::computeValue() {
