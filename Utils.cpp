@@ -29,14 +29,20 @@ void quickSort(double arr[], long low, long high) {
     }
 }
 
-double max(double values[], long valuesLen) {
+long maxInd(double values[], long valuesLen) {
+    long ind = 0;
     double max = 0.;
     for (long i = 0; i < valuesLen; ++i) {
         if (values[i] > max) {
+            ind = i;
             max = values[i];
         }
     }
-    return max;
+    return ind;
+}
+
+double max(double values[], long valuesLen) {
+    return values[maxInd(values, valuesLen)];
 }
 
 double sum(double values[], long valuesLen) {

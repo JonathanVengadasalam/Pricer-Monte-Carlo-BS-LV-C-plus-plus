@@ -1,6 +1,7 @@
 void swap(double& a, double& b);
 int partition(double arr[], long low, long high);
 void quickSort(double arr[], long low, long high);
+long maxInd(double values[], long valuesLen);
 double max(double values[], long valuesLen);
 double sum(double values[], long valuesLen);
 double sum(double values[], long valuesLen, long exposant);

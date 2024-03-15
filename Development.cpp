@@ -2,76 +2,106 @@
 //
 
 #include <iostream>
-#include "RandomUtils.hpp"
+#include "Utils.hpp"
 #include "DiffusionBlackScholes.hpp"
 #include "Pricer.hpp"
+#include "RandomUniformTore.hpp"
+#include "RandomUniformLCG.hpp"
+#include "RandomNormalMoro.hpp"
 
-
-static void testBlackScholesSdeFormulaDiscretized() {
-    double mu = 0.05;
-    double sigma = 0.2;
-    double T = 0.5;
-    long N = 126;
-    BlackScholes bs(mu, sigma);
-
-    long normalsLen = 50000;
-    double* normals = new double[normalsLen];
-    for (int i = 0; i < normalsLen; ++i) {
-        double* spots = new double[N];
-        double* randoms = new double[N - 1];
-        normalDistritor(randoms, N - 1);
-        double spot_T = bs.diffuseUnderlying(spots, N, randoms, N - 1, T / N);
-        normals[i] = bs.reverseLogNormalFunction(T, spot_T);
-        delete[] spots;
-        delete[] randoms;
+void testUniformGenerators(RandomUniform &generator) {
+    long n = 1000;
+    double* uniforms = new double[n];
+    double* modules = new double[n];
+    double* phases = new double[n];
+    double* diffs = new double[n];
+    generator.generateArray(uniforms, n);
+    discretFourierTransform(modules, phases, uniforms, n);
+    long maxModuleInd = 1;
+    double maxModule = 0.;
+    for (long i = maxModuleInd; i < n; ++i) {
+        if (modules[i] > maxModule) {
+            maxModuleInd = i;
+            maxModule = modules[i];
+        }
     }
-
-    quickSort(normals, 0, normalsLen - 1);
-
-    double _mean = mean(normals, normalsLen);
-    double _variance = variance(normals, normalsLen);
-    double maxDistance = kolmogorovSmirnov(normals, normalsLen);
-    double andersonD = andersonDarling(normals, normalsLen);
-
+    quickSort(uniforms, 0, n - 1);
+    double _mean = mean(uniforms, n);
+    double _variance = variance(uniforms, n);
+    generator.kolmogorovSmirnov(diffs, n, uniforms);
+    double maxDistance = max(diffs, n);
+    std::cout << "Uniform law [0;1] test metrics :" << std::endl;
     std::cout << "mean : " << _mean << std::endl;
     std::cout << "variance : " << _variance << std::endl;
-    std::cout << "KS distance : " << maxDistance << std::endl;
-    std::cout << "AD measure : " << andersonD << std::endl;
+    std::cout << "kolmogorov.s distance : " << maxDistance << std::endl;
+    std::cout << "discret fourier transform : frequance: " << maxModuleInd << "; module: " << maxModule << "\n" << std::endl;
+    generator.initialize();
 
-    delete[] normals;
-}
+    delete[] uniforms;
+    delete[] modules;
+    delete[] phases;
+    delete[] diffs;
 
-static void testEuropeanCallPriceLikelihood() {
     double mu = 0.05;
     double sigma = 0.2;
     double S0 = 1.;
-    double K = 1.1;
     double T = 0.5;
-    long sampleLen = 100000;
-    long timeSteps = 1;
-    DiffusionBlackScholes bs(mu, sigma);
+    double K = 1.1;
     EuropeanCall call(K, T);
-    double* payoffs = new double[sampleLen];
-    MonteCarlo(payoffs, sampleLen, bs, call, timeSteps);
+    long N = std::ceil(252. * call.T / (double)1);;
+    double dt = call.T / (double)N;
+    
+    DiffusionBlackScholes bs(mu, sigma);
+    RandomNormalMoro moro(generator);
+
+    long normalsLen = 10000;
+    double* spots = new double[N + 1];
+    double* normals = new double[normalsLen];
+    double* payoffs = new double[normalsLen];
+    double* randoms = new double[N * normalsLen];
+    moro.generateArray(randoms, N * normalsLen);
+    for (int i = 0; i < normalsLen; ++i) {
+        double spot_T = bs.diffuseUnderlying(spots, randoms, N, i * N, dt);
+        payoffs[i] = call.payoffDiscounted(spots, N + 1, bs.drift(spot_T, call.T));
+        normals[i] = bs.reverseLogNormalFunction(T, spot_T);
+    }
+    delete[] spots;
+
+    double* theodiffs = new double[normalsLen];
+    quickSort(normals, 0, normalsLen - 1);
+    _mean = mean(normals, normalsLen);
+    _variance = variance(normals, normalsLen);
+    moro.kolmogorovSmirnov(theodiffs, normalsLen, normals);
+    maxDistance = max(theodiffs, normalsLen);
+    std::cout << "Log normal diffused spot at T reversed to normal :" << std::endl;
+    std::cout << "mean : " << _mean << std::endl;
+    std::cout << "variance : " << _variance << std::endl;
+    std::cout << "kolmogorov.s distance : " << maxDistance << "\n" << std::endl;
+    delete[] theodiffs;
 
     double theoPrice = bs.europeanCallPayoffMean(S0, K, T);
     double meanSquareError = std::sqrt(bs.europeanCallPayoffVariance(S0, K, T));
-    double empiricMean = mean(payoffs, sampleLen);
-    double Z = std::sqrt(sampleLen) * (empiricMean - theoPrice) / meanSquareError; // central limit
-
+    double empiricMean = mean(payoffs, normalsLen);
+    double Z = std::sqrt(normalsLen) * (empiricMean - theoPrice) / meanSquareError;
+    std::cout << "MC price vs theo price :" << std::endl;
     std::cout << "monte carlo price : " << empiricMean << std::endl;
     std::cout << "theorical price : " << theoPrice << std::endl;
     std::cout << "central limit normalized : " << Z << std::endl;
-    std::cout << "proba of empirical values given theo : " << normalProba(Z) << std::endl;
+    std::cout << "proba of empirical values given theo : " << moro.probability(Z) << std::endl;
 
+    delete[] normals;
+    delete[] randoms;
     delete[] payoffs;
 }
 
 int main() {
 
-    //testBlackScholesSdeFormulaDiscretized();
-    testEuropeanCallPriceLikelihood();
-    
+    RandomUniformLCG lcg(10);
+    RandomUniformTore tore(19);
+    RandomUniformTore shuffledTore(19, &lcg);
+
+    testUniformGenerators(shuffledTore);
+
     return 0;
 }
 
